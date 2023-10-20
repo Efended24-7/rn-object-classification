@@ -13,12 +13,15 @@ import { decodeJpeg } from '@tensorflow/tfjs-react-native';
 import * as mobilenet from '@tensorflow-models/mobilenet';
 
 
+
+
 const App = () => {
   const [isTfReady, setIsTfReady] = useState(false);
   const [result, setResult] = useState('');
   const [pickedImage, setPickedImage] = useState('');
-  const [model, setModel] = useState(null);
 
+
+  // select an image from photo gallery and set it
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -27,19 +30,22 @@ const App = () => {
       quality: 1,
     });
     if (!result.cancelled) {
-      setPickedImage(result.assets[0].uri);
+      setPickedImage(result.uri);
     }
   };
 
 
+
+
   const classifyUsingMobilenet = async () => {
-    if (model) {
+    
       try {
         // Load mobilenet.
         await tf.ready();
         const model = await mobilenet.load();
         setIsTfReady(true);
         console.log("starting inference with picked image: " + pickedImage)
+
 
         // Convert image to tensor
         const imgB64 = await FileSystem.readAsStringAsync(pickedImage, {
@@ -48,6 +54,7 @@ const App = () => {
         const imgBuffer = tf.util.encodeString(imgB64, 'base64').buffer;
         const raw = new Uint8Array(imgBuffer)
         const imageTensor = decodeJpeg(raw);
+
 
         // Classify the tensor and show the result
         const prediction = await model.classify(imageTensor);
@@ -59,33 +66,24 @@ const App = () => {
       } catch (err) {
         console.log(err);
       }      
-    }
+    
+
 
   };
 
-  useEffect(() => {
-    const loadModel = async () => {
-      await tf.ready();
-      const mobilenetModel = await mobilenet.load();
-      setModel(mobilenetModel);
-    };
-  
-    loadModel();
-  }, []);
+
+
+
+
 
   useEffect(() => {
     classifyUsingMobilenet()
   }, [pickedImage]);
 
-  useEffect(() => {
-    // Cleanup function
-    return () => {
-      tf.disposeVariables(); // Clean up tensors
-      if (model) {
-        model.dispose(); // Dispose of the loaded model
-      }
-    };
-  }, []);
+
+
+
+
 
   return (
     <View
