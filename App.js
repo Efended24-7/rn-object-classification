@@ -4,13 +4,16 @@
 // see these in the link: https://blog.logrocket.com/build-object-classification-app-tensorflow-react-native/
 
 
-import React, { useEffect, useState } from 'react';
 import { View, Text, Image, Button, StyleSheet, SafeAreaView } from 'react-native';
-import * as tf from '@tensorflow/tfjs';
-import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system';
 import { decodeJpeg } from '@tensorflow/tfjs-react-native';
 import * as mobilenet from '@tensorflow-models/mobilenet';
+import React, { useEffect, useState } from 'react';
+import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
+import * as tf from '@tensorflow/tfjs';
+
+// send data to server
+import axios from 'axios';
 
 
 const App = () => {
@@ -48,10 +51,6 @@ const App = () => {
     }
   };
 
-
- //model.save('mobilenet_v2_saved_model', save_format='tf')
-
-
   const classifyUsingMobilenet = async () => {
     try {
       if (model) { // Check if the model is loaded
@@ -66,12 +65,11 @@ const App = () => {
         // Classify the tensor and show the result
         const prediction = await model.classify(imageTensor);
         if (prediction && prediction.length > 0) {
-        //  setResult(
-        //    `${prediction[0].className} (${prediction[0].probability.toFixed(2)})`
-        //  );
-          // Capture the top 3 predictions
+          // Get the top 3 predictions
           const top3Predictions = prediction.slice(0, 3);
           setResult(top3Predictions);
+          // automatically send to server when you get your predictions without having to use buttons
+          sendDataToServer(top3Predictions);
         }
       }
     } catch (err) {
@@ -83,7 +81,7 @@ const App = () => {
     classifyUsingMobilenet();
   }, [pickedImage, model]);
 
-/** */
+  
   useEffect(() => {
     // Cleanup function
     return () => {
@@ -94,7 +92,30 @@ const App = () => {
     };
   }, [model]);
 
-
+  /** */
+  const sendDataToServer = async () => {
+    try {
+      if (pickedImage && result.length > 0) {
+        const imageBase64 = await FileSystem.readAsStringAsync(pickedImage, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        const dataToSend = {
+          image: imageBase64,
+          predictions: result,
+        };
+        const response = await axios.post(
+          'https://flaskapp.jondooley87.repl.co/upload', 
+          dataToSend
+        );
+        console.log('Response from the server:', response.data);
+      } else {
+        console.log('Please select an image and classify it first.');
+      }
+    } catch (error) {
+      console.error('Error sending data:', error);
+    }
+  };
+  
 
   return (
     <SafeAreaView style={styles.container}>
