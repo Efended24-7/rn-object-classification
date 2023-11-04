@@ -82,17 +82,9 @@ const App = () => {
   }, [pickedImage, model]);
 
   
-  useEffect(() => {
-    // Cleanup function
-    return () => {
-      tf.disposeVariables(); // Clean up tensors
-      if (model) {
-        model.dispose(); // Dispose of the loaded model
-      }
-    };
-  }, [model]);
 
-  /** */
+
+  /* Send Data to Server function */
   const sendDataToServer = async () => {
     try {
       if (pickedImage && result.length > 0) {
@@ -103,8 +95,8 @@ const App = () => {
           image: imageBase64,
           predictions: result,
         };
-        const response = await axios.post(
-          'https://flaskapp.jondooley87.repl.co/upload', 
+        const response = await axios.get(
+          'http://54.215.250.216:5000/', 
           dataToSend
         );
         console.log('Response from the server:', response.data);
