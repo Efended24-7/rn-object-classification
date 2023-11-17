@@ -2,6 +2,7 @@
   "name": "rn-object-classification",
   "version": "0.0.1",
   "license": "Apache-2.0",
+  "main": "node_modules/expo/AppEntry.js",
   "scripts": {
     "start": "expo start"
   },
@@ -13,6 +14,7 @@
     "@tensorflow/tfjs-react-native": "0.8.0",
     "axios": "^1.6.0",
     "expo": "~47.0.6",
+    "expo-asset": "^8.10.1",
     "expo-camera": "~13.1.0",
     "expo-file-system": "~15.1.1",
     "expo-gl": "~12.0.1",
