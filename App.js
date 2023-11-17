@@ -22,7 +22,6 @@ const App = () => {
   const [result, setResult] = useState('');
   const [model, setModel] = useState(null); // Define the model variable
   
-
   /** inital h5 model code 
   // Load the H5 model when the component is mounted
   useEffect(() => {
